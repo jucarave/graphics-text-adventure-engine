@@ -5,9 +5,31 @@
       <title>Graphics Text Adventure Engine</title>
 
       <script src="js/game.js"></script>
+
+      <style>
+        body {
+          margin: 0;
+          padding: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+        }
+
+        canvas {
+          image-rendering: pixelated;
+          image-rendering: -moz-crisp-edges;
+          image-rendering: crisp-edges;
+          width: 100%;
+          height: 100%;
+          max-width: 100vw;
+          max-height: 100vh;
+          object-fit: contain;
+        }
+      </style>
   </head>
 
   <body>
-    <h1>Graphics Text Adventure Engine</h1>
+    <canvas id="canvas" width="320" height="240"></canvas>
   </body>
 </html>
