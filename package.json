@@ -1,0 +1,24 @@
+{
+  "name": "graphicstextadventureengine",
+  "version": "1.0.0",
+  "description": "Engine for Graphics Text Adventures",
+  "main": "index.js",
+  "scripts": {
+    "build": "node scripts/build.js --minify",
+    "watch": "node scripts/build.js --watch"
+  },
+  "author": "Camilo Ramírez (Jucarave)",
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@types/estree": "^1.0.6",
+    "@typescript-eslint/eslint-plugin": "^8.26.1",
+    "@typescript-eslint/parser": "^8.26.1",
+    "esbuild": "^0.25.1",
+    "eslint": "^9.22.0",
+    "globals": "^16.0.0",
+    "json-schema": "^0.4.0",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.1"
+  }
+}
