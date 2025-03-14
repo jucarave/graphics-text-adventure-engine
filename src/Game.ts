@@ -8,17 +8,20 @@ import { Geometry } from './engine/Geometry';
 import { Entity } from './engine/Entity';
 import { basicShader } from './shaders/BasicShader';
 
-let entity: Entity;
 class Game {
+  private renderer: Renderer;
+  private camera: Camera;
+  private entity: Entity;
+
   constructor() {
-    const renderer = new Renderer(document.getElementById('canvas') as HTMLCanvasElement);
-    const camera = new Camera(320, 240);
-    new Texture(renderer.GL, 'redSquare', 'img/redSquare.png');
+    this.renderer = new Renderer(document.getElementById('canvas') as HTMLCanvasElement);
+    this.camera = new Camera(427, 240);
+    new Texture(this.renderer.GL, 'redSquare', 'img/redSquare.png');
 
-    gameData.shader = new Shader(renderer.GL, basicShader.vertexShader, basicShader.fragmentShader);
-    gameData.material = new Material(renderer.GL, gameData.shader, Texture.getTexture('redSquare'));
+    gameData.shader = new Shader(this.renderer.GL, basicShader.vertexShader, basicShader.fragmentShader);
+    gameData.material = new Material(this.renderer.GL, gameData.shader, Texture.getTexture('redSquare'));
 
-    const quad = new Geometry(renderer.GL);
+    const quad = new Geometry(this.renderer.GL);
     quad.addVertex(-16, -16, 0, 0, 0)
       .addVertex(16, -16, 0, 1, 0)
       .addVertex(16, 16, 0, 1, 1)
@@ -27,18 +30,21 @@ class Game {
       .addIndex(2).addIndex(3).addIndex(0)
       .build();
 
-    entity = new Entity(quad, gameData.material);
+    this.entity = new Entity(quad, gameData.material);
 
-    camera.position.z = 100;
+    this.camera.position.z = 100;
 
     gameData.shader.use();
+
+    window.addEventListener('resize', this.renderer.onResize.bind(this.renderer));
+    this.renderer.onResize();
 
     this.gameLoop();
   }
 
   private gameLoop(): void {
-    Renderer.instance.clear();
-    entity.render();
+    this.renderer.clear();
+    this.entity.render();
 
     requestAnimationFrame(() => this.gameLoop());
   }

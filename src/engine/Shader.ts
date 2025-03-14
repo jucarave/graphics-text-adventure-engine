@@ -72,11 +72,14 @@ export class Shader {
   }
 
   public use(): void {
-    this.gl.useProgram(this.program);
+    const currentProgram = this.gl.getParameter(this.gl.CURRENT_PROGRAM);
+    if (currentProgram !== this.program) {
+      this.gl.useProgram(this.program);
 
-    for (const name in this.attributes) {
-      const location = this.attributes[name];
-      this.gl.enableVertexAttribArray(location);
+      for (const name in this.attributes) {
+        const location = this.attributes[name];
+        this.gl.enableVertexAttribArray(location);
+      }
     }
   }
 
