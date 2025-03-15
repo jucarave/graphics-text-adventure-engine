@@ -1,56 +1,96 @@
 import { Signal } from '../engine/Signal';
 
 export class Matrix4 {
-  private data: Float32Array;
+  private data: Array<number>;
   public onChange: Signal = new Signal();
 
   constructor() {
-    this.data = new Float32Array(16);
+    this.data = [];
     this.setIdentity();
   }
 
+  public set(...args: Array<number>): this {
+    if (args.length !== 16) {
+      throw new Error('Matrix4 must have 16 elements.');
+    }
+
+    for (let i=0; i<16; i++) {
+      this.data[i] = args[i];
+    }
+
+    this.onChange.dispatch(this);
+    return this;
+  }
+
   public setIdentity(): this {
-    this.data.set([
+    this.set(
       1, 0, 0, 0,
       0, 1, 0, 0,
       0, 0, 1, 0,
       0, 0, 0, 1
-    ]);
-    this.onChange.dispatch(this);
+    );
 
     return this;
   }
 
-  public multiply(matrix: Matrix4): this {
-    const a = this.data;
-    const b = matrix.data;
-    const result = new Float32Array(16);
+  public copy(matrix: Matrix4): this {
+    this.set(...matrix.data);
+    return this;
+  }
 
-    for (let row = 0; row < 4; row++) {
-      for (let col = 0; col < 4; col++) {
-        result[row * 4 + col] =
-          a[row * 4 + 0] * b[0 * 4 + col] +
-          a[row * 4 + 1] * b[1 * 4 + col] +
-          a[row * 4 + 2] * b[2 * 4 + col] +
-          a[row * 4 + 3] * b[3 * 4 + col];
-      }
-    }
+  private vector4Dot(A: Array<number>, B: Array<number>): number {
+    return A[0] * B[0] + A[1] * B[1] + A[2] * B[2] + A[3] * B[3];
+  }
 
-    this.data.set(result);
+  public multiply(matrixB: Matrix4): this {
+    let T: Array<number> = matrixB.data;
+
+    const C1 = [T[0], T[4], T[8], T[12]];
+    const C2 = [T[1], T[5], T[9], T[13]];
+    const C3 = [T[2], T[6], T[10], T[14]];
+    const C4 = [T[3], T[7], T[11], T[15]];
+
+    T = this.data;
+    const R1 = [T[0], T[1], T[2], T[3]];
+    const R2 = [T[4], T[5], T[6], T[7]];
+    const R3 = [T[8], T[9], T[10], T[11]];
+    const R4 = [T[12], T[13], T[14], T[15]];
+
+    this.set(
+      this.vector4Dot(R1, C1),
+      this.vector4Dot(R1, C2),
+      this.vector4Dot(R1, C3),
+      this.vector4Dot(R1, C4),
+
+      this.vector4Dot(R2, C1),
+      this.vector4Dot(R2, C2),
+      this.vector4Dot(R2, C3),
+      this.vector4Dot(R2, C4),
+
+      this.vector4Dot(R3, C1),
+      this.vector4Dot(R3, C2),
+      this.vector4Dot(R3, C3),
+      this.vector4Dot(R3, C4),
+
+      this.vector4Dot(R4, C1),
+      this.vector4Dot(R4, C2),
+      this.vector4Dot(R4, C3),
+      this.vector4Dot(R4, C4)
+    );
+
     this.onChange.dispatch(this);
-
     return this;
   }
 
   public rotateX(angle: number): this {
     const c = Math.cos(angle);
     const s = Math.sin(angle);
-    const rotation = new Matrix4().set([
+    const rotation = new Matrix4().set(
       1, 0, 0, 0,
-      0, c, -s, 0,
-      0, s, c, 0,
+      0, c, s, 0,
+      0, -s, c, 0,
       0, 0, 0, 1
-    ]);
+    );
 
     return this.multiply(rotation);
   }
@@ -58,12 +98,12 @@ export class Matrix4 {
   public rotateY(angle: number): this {
     const c = Math.cos(angle);
     const s = Math.sin(angle);
-    const rotation = new Matrix4().set([
+    const rotation = new Matrix4().set(
       c, 0, s, 0,
       0, 1, 0, 0,
       -s, 0, c, 0,
       0, 0, 0, 1
-    ]);
+    );
 
     return this.multiply(rotation);
   }
@@ -71,42 +111,36 @@ export class Matrix4 {
   public rotateZ(angle: number): this {
     const c = Math.cos(angle);
     const s = Math.sin(angle);
-    const rotation = new Matrix4().set([
-      c, -s, 0, 0,
-      s, c, 0, 0,
+    const rotation = new Matrix4().set(
+      c, s, 0, 0,
+      -s, c, 0, 0,
       0, 0, 1, 0,
       0, 0, 0, 1
-    ]);
+    );
 
     return this.multiply(rotation);
   }
 
-  public translate(x: number, y: number, z: number): this {
-    const translation = new Matrix4().set([
-      1, 0, 0, x,
-      0, 1, 0, y,
-      0, 0, 1, z,
-      0, 0, 0, 1
-    ]);
-    return this.multiply(translation);
-  }
-
-  public set(data: number[]): this {
-    if (data.length !== 16) {
-      throw new Error('Matrix4 data must have 16 elements.');
+  public translate(x: number, y: number, z: number, relative: boolean = false): this {
+    if (relative) {
+      this.data[12] += x;
+      this.data[13] += y;
+      this.data[14] += z;
+    } else {
+      this.data[12] = x;
+      this.data[13] = y;
+      this.data[14] = z;
     }
 
-    this.data.set(data);
     this.onChange.dispatch(this);
     return this;
   }
 
-  public getData(): Float32Array {
+  public getData(): Array<number> {
     return this.data;
   }
 
   public static identity(): Matrix4 {
     return new Matrix4().setIdentity();
   }
-
 }

@@ -71,6 +71,14 @@ export class Texture {
     return this.texture;
   }
 
+  public getImage(): HTMLImageElement {
+    if (!this.image) {
+      throw new Error('Image not loaded.');
+    }
+
+    return this.image;
+  }
+
   public get width(): number {
     if (!this.image) {
       return 0;

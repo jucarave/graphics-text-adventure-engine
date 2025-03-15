@@ -52,6 +52,8 @@ export class Geometry {
     this.vertices = [];
     this.indices = [];
     this.textureCoords = [];
+
+    this.unbind();
   }
 
   public bind(): void {

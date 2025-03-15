@@ -28,12 +28,21 @@ export class Camera {
     const right = width / 2;
     const bottom = -height / 2;
     const top = height / 2;
-    const projection = new Matrix4().set([
-      2 / (right - left), 0, 0, -(right + left) / (right - left),
-      0, 2 / (top - bottom), 0, -(top + bottom) / (top - bottom),
-      0, 0, -2 / (zfar - znear), -(zfar + znear) / (zfar - znear),
-      0, 0, 0, 1
-    ]);
+
+    const A = 2 / (right - left);
+    const B = 2 / (top - bottom);
+    const C = -2 / (zfar - znear);
+
+    const X = -(right + left) / (right - left);
+    const Y = -(top + bottom) / (top - bottom);
+    const Z = -(zfar + znear) / (zfar - znear);
+
+    const projection = new Matrix4().set(
+      A, 0, 0, 0,
+      0, B, 0, 0,
+      0, 0, C, 0,
+      X, Y, Z, 1
+    );
 
     return projection;
   }

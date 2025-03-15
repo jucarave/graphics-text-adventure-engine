@@ -6,18 +6,35 @@ import { Shader } from './engine/Shader';
 import { Texture } from './engine/Texture';
 import { Geometry } from './engine/Geometry';
 import { Entity } from './engine/Entity';
+import { Font } from './engine/Font';
+import { Text } from './engine/Text';
 import { basicShader } from './shaders/BasicShader';
 
 class Game {
   private renderer: Renderer;
   private camera: Camera;
-  private entity: Entity;
+  private entity: Entity | null = null;
+  private textEntity: Entity | null = null;
 
   constructor() {
     this.renderer = new Renderer(document.getElementById('canvas') as HTMLCanvasElement);
     this.camera = new Camera(427, 240);
-    new Texture(this.renderer.GL, 'redSquare', 'img/redSquare.png');
 
+    new Texture(this.renderer.GL, 'redSquare', 'img/redSquare.png');
+    new Texture(this.renderer.GL, 'font', 'img/font.png');
+
+    this.waitForTexturesToLoad();
+  }
+
+  private waitForTexturesToLoad(): void {
+    if (!Texture.areTexturesLoaded()) {
+      requestAnimationFrame(() => this.waitForTexturesToLoad());
+    } else {
+      this.init();
+    }
+  }
+
+  private init(): void {
     gameData.shader = new Shader(this.renderer.GL, basicShader.vertexShader, basicShader.fragmentShader);
     gameData.material = new Material(this.renderer.GL, gameData.shader, Texture.getTexture('redSquare'));
 
@@ -31,8 +48,16 @@ class Game {
       .build();
 
     this.entity = new Entity(quad, gameData.material);
+    this.entity.position.y = 0;
 
-    this.camera.position.z = 100;
+    const font = new Font(this.renderer.GL, Texture.getTexture('font'), 'abcdefghijklmnñopqrstuvwxyzáéíóúüABCDEFGHIJKLMNÑOPQRSTUVWXYZÁÉÍÓÚÜ0123456789!¡?¿()-=/., ', 42, 6, 11);
+    const textGeometry = new Text(this.renderer.GL, font, 'Hello, World!').getGeometry();
+    const textMaterial = new Material(this.renderer.GL, gameData.shader, Texture.getTexture('font'));
+
+    this.textEntity = new Entity(textGeometry, textMaterial);
+    this.textEntity.position.y = 24;
+
+    this.camera.position.z = -100;
 
     gameData.shader.use();
 
@@ -44,7 +69,8 @@ class Game {
 
   private gameLoop(): void {
     this.renderer.clear();
-    this.entity.render();
+    if (this.entity) this.entity.render();
+    if (this.textEntity) this.textEntity.render();
 
     requestAnimationFrame(() => this.gameLoop());
   }

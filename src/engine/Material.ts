@@ -8,6 +8,7 @@ export class Material {
   private gl: WebGLRenderingContext;
   private shader: Shader;
   private texture: Texture;
+  private finalModelMatrix: Matrix4 = new Matrix4();
   private static currentMaterial: Material | null = null;
 
   constructor(gl: WebGLRenderingContext, shader: Shader, texture: Texture) {
@@ -25,27 +26,26 @@ export class Material {
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, this.texture.getWebGLTexture());
 
-      const positionLocation = this.shader.getAttributeLocation('aPosition');
-      const texCoordLocation = this.shader.getAttributeLocation('aTexCoord');
-
-      gl.enableVertexAttribArray(positionLocation);
-      gl.enableVertexAttribArray(texCoordLocation);
-
-      gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 5 * Float32Array.BYTES_PER_ELEMENT, 0);
-      gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 5 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
-
       Material.currentMaterial = this;
     }
 
+    const positionLocation = this.shader.getAttributeLocation('aPosition');
+    const texCoordLocation = this.shader.getAttributeLocation('aTexCoord');
+
+    gl.enableVertexAttribArray(positionLocation);
+    gl.enableVertexAttribArray(texCoordLocation);
+
     geometry.bind();
+    gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 5 * 4, 0);
+    gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 5 * 4, 3 * 4);
 
     const camera = Camera.instance;
-    const finalModelMatrix = camera.getModelMatrix().multiply(modelMatrix);
+    this.finalModelMatrix.copy(modelMatrix).multiply(camera.getModelMatrix());
 
     const uModelMatrixLocation = this.shader.getUniformLocation('uModelMatrix');
     const uProjectionMatrixLocation = this.shader.getUniformLocation('uProjectionMatrix');
 
-    gl.uniformMatrix4fv(uModelMatrixLocation, false, finalModelMatrix.getData());
+    gl.uniformMatrix4fv(uModelMatrixLocation, false, this.finalModelMatrix.getData());
     gl.uniformMatrix4fv(uProjectionMatrixLocation, false, camera.projectionMatrix.getData());
 
     gl.drawElements(gl.TRIANGLES, geometry.getIndicesCount(), gl.UNSIGNED_SHORT, 0);
