@@ -78,8 +78,8 @@ export class Entity {
   public getModelMatrix(): Matrix4 {
     if (this.isDirty) {
       this.modelMatrix.setIdentity()
-        .translate(this.position.x, this.position.y, this.position.z)
-        .rotateZ(this.rotation);
+        .rotateZ(this.rotation)
+        .translate(this.position.x, this.position.y, this.position.z);
 
       this.isDirty = false;
     }

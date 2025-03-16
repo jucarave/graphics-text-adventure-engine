@@ -36,7 +36,7 @@ class Game {
 
   private init(): void {
     gameData.shader = new Shader(this.renderer.GL, basicShader.vertexShader, basicShader.fragmentShader);
-    gameData.material = new Material(this.renderer.GL, gameData.shader, Texture.getTexture('redSquare'));
+    const material = new Material(this.renderer.GL, gameData.shader, Texture.getTexture('redSquare'), 'Basic');
 
     const quad = new Geometry(this.renderer.GL);
     quad.addVertex(-16, -16, 0, 0, 0)
@@ -47,12 +47,13 @@ class Game {
       .addIndex(2).addIndex(3).addIndex(0)
       .build();
 
-    this.entity = new Entity(quad, gameData.material);
+    this.entity = new Entity(quad, material);
     this.entity.position.y = 0;
 
     const font = new Font(this.renderer.GL, Texture.getTexture('font'), 'abcdefghijklmnñopqrstuvwxyzáéíóúüABCDEFGHIJKLMNÑOPQRSTUVWXYZÁÉÍÓÚÜ0123456789!¡?¿()-=/., ', 42, 6, 11);
     const textGeometry = new Text(this.renderer.GL, font, 'Hello, World!').getGeometry();
-    const textMaterial = new Material(this.renderer.GL, gameData.shader, Texture.getTexture('font'));
+    const textMaterial = new Material(this.renderer.GL, gameData.shader, Texture.getTexture('font'), 'Green text');
+    textMaterial.color = [0, 1, 0, 1];
 
     this.textEntity = new Entity(textGeometry, textMaterial);
     this.textEntity.position.y = 24;
@@ -70,7 +71,10 @@ class Game {
   private gameLoop(): void {
     this.renderer.clear();
     if (this.entity) this.entity.render();
-    if (this.textEntity) this.textEntity.render();
+    if (this.textEntity) {
+      this.textEntity.render();
+      this.textEntity.setRotation(this.textEntity.rotation + 0.01);
+    }
 
     requestAnimationFrame(() => this.gameLoop());
   }
