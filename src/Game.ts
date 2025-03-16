@@ -9,6 +9,7 @@ import { Entity } from './engine/Entity';
 import { Font } from './engine/Font';
 import { Text } from './engine/Text';
 import { basicShader } from './shaders/BasicShader';
+import { Input } from './engine/Input';
 
 class Game {
   private renderer: Renderer;
@@ -19,6 +20,7 @@ class Game {
   constructor() {
     this.renderer = new Renderer(document.getElementById('canvas') as HTMLCanvasElement);
     this.camera = new Camera(427, 240);
+    new Input();
 
     new Texture(this.renderer.GL, 'redSquare', 'img/redSquare.png');
     new Texture(this.renderer.GL, 'font', 'img/font.png');

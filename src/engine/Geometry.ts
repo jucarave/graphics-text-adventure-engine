@@ -78,4 +78,26 @@ export class Geometry {
   public getIndicesCount(): number {
     return this.indicesCount;
   }
+
+  public static createQuad(gl: WebGLRenderingContext, width: number, height: number, uvs: [number, number, number, number], anchorX: number, anchorY: number): Geometry {
+    const geometry = new Geometry(gl);
+
+    const x0 = -anchorX * width;
+    const x1 = (1 - anchorX) * width;
+    const y0 = -anchorY * height;
+    const y1 = (1 - anchorY) * height;
+
+    const [u0, v0, u1, v1] = uvs;
+
+    geometry.addVertex(x0, y0, 0, u0, v1)
+      .addVertex(x1, y0, 0, u1, v1)
+      .addVertex(x1, y1, 0, u1, v0)
+      .addVertex(x0, y1, 0, u0, v0)
+      .addIndex(0).addIndex(1).addIndex(2)
+      .addIndex(2).addIndex(3).addIndex(0);
+
+    geometry.build();
+
+    return geometry;
+  }
 }
